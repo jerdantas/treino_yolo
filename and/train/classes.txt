@@ -1,0 +1,8 @@
+person
+eye-glass
+face-shield
+glove
+helmet
+mask
+safety-shoe
+
