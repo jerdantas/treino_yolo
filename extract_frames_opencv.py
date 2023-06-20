@@ -3,7 +3,9 @@ import cv2
 import numpy as np
 import os
 
-SAVING_FRAMES_PER_SECOND = 10
+SAVING_FRAMES_PER_SECOND = 4
+START_SAVING_AT_SECONDES = 130
+START_SAVING_COUNT = int(START_SAVING_AT_SECONDES * SAVING_FRAMES_PER_SECOND)
 
 def format_timedelta(td):
     """Utility function to format timedelta objects in a cool way (e.g 00:00:20.05)
@@ -48,24 +50,25 @@ def main(video_file):
         if not is_read:
             # break out of the loop if there are no frames to read
             break
-        # get the duration by dividing the frame count by the FPS
-        frame_duration = count / fps
-        try:
-            # get the earliest duration to save
-            closest_duration = saving_frames_durations[0]
-        except IndexError:
-            # the list is empty, all duration frames were saved
-            break
-        if frame_duration >= closest_duration:
-            # if closest duration is less than or equals the frame duration,
-            # then save the frame
-            frame_duration_formatted = format_timedelta(timedelta(seconds=frame_duration))
-            cv2.imwrite(os.path.join(filename, f"frame{frame_duration_formatted}.jpg"), frame)
-            # drop the duration spot from the list, since this duration spot is already saved
+        if count >= START_SAVING_COUNT:
+            # get the duration by dividing the frame count by the FPS
+            frame_duration = count / fps
             try:
-                saving_frames_durations.pop(0)
+                # get the earliest duration to save
+                closest_duration = saving_frames_durations[0]
             except IndexError:
-                pass
+                # the list is empty, all duration frames were saved
+                break
+            if frame_duration >= closest_duration:
+                # if closest duration is less than or equals the frame duration,
+                # then save the frame
+                frame_duration_formatted = format_timedelta(timedelta(seconds=frame_duration))
+                cv2.imwrite(os.path.join(filename, f"frame{frame_duration_formatted}.jpg"), frame)
+                # drop the duration spot from the list, since this duration spot is already saved
+                try:
+                    saving_frames_durations.pop(0)
+                except IndexError:
+                    pass
         # increment the frame count
         count += 1
 
